@@ -1,8 +1,9 @@
 package com.itqa.testautomation;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.time.Duration;
+import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -27,8 +28,11 @@ class TestAutomationApplicationTests {
 	}
 
 	@BeforeEach
-	public void setup() {
+	public void setup() throws InterruptedException {
 		driver = new ChromeDriver();
+		driver.get("https://themeselection.com/");
+
+		Thread.sleep(3000);
 	}
 
 	@AfterEach
@@ -37,23 +41,101 @@ class TestAutomationApplicationTests {
 	}
 
 	@Test
-	public void eightComponents() {
-		driver.get("https://www.selenium.dev/selenium/web/web-form.html");
+	void invalidEmail() throws InterruptedException {
+		WebElement loginBtn = driver.findElement(By.id("menu-item-161"));
+		loginBtn.click();
 
-		String title = driver.getTitle();
-		assertEquals("Web form", title);
+		Thread.sleep(1000);
 
-		driver.manage().timeouts().implicitlyWait(Duration.ofMillis(500));
+		WebElement emailInput = driver.findElement(By.xpath("//input[@name=\"login_username\"]"));
+		WebElement passwordInput = driver.findElement(By.xpath("//input[@name=\"login_password\"]"));
 
-		WebElement textBox = driver.findElement(By.name("my-text"));
-		WebElement submitButton = driver.findElement(By.cssSelector("button"));
+		emailInput.sendKeys("chamal");
+		passwordInput.sendKeys("chamal@1234");
 
-		textBox.sendKeys("Selenium");
-		submitButton.click();
+		WebElement signInBtn = driver.findElement(By.xpath("//*[@id=\"pp_login_3\"]/div/div[6]/input"));
+		signInBtn.click();
 
-		WebElement message = driver.findElement(By.id("message"));
-		String value = message.getText();
-		assertEquals("Received!", value);
+		Thread.sleep(3000);
+
+		WebElement error = driver.findElement(By.className("profilepress-login-status"));
+		assertEquals(
+				"Error: The username chamal is not registered on this site. If you are unsure of your username, try your email address instead.",
+				error.getText());
 	}
 
+	@Test
+	void invalidFakeEmail() throws InterruptedException {
+		WebElement loginBtn = driver.findElement(By.id("menu-item-161"));
+		loginBtn.click();
+
+		Thread.sleep(1000);
+
+		WebElement emailInput = driver.findElement(By.xpath("//input[@name=\"login_username\"]"));
+		WebElement passwordInput = driver.findElement(By.xpath("//input[@name=\"login_password\"]"));
+
+		emailInput.sendKeys("chamal@gmail.com");
+		passwordInput.sendKeys("chamal@1234");
+
+		WebElement signInBtn = driver.findElement(By.xpath("//*[@id=\"pp_login_3\"]/div/div[6]/input"));
+		signInBtn.click();
+
+		Thread.sleep(3000);
+
+		WebElement error = driver.findElement(By.className("profilepress-login-status"));
+		assertEquals("Unknown email address. Check again or try your username.", error.getText());
+	}
+
+	@Test
+	void invalidPassWithRealUser() throws InterruptedException {
+		WebElement loginBtn = driver.findElement(By.id("menu-item-161"));
+		loginBtn.click();
+
+		Thread.sleep(1000);
+
+		WebElement emailInput = driver.findElement(By.xpath("//input[@name=\"login_username\"]"));
+		WebElement passwordInput = driver.findElement(By.xpath("//input[@name=\"login_password\"]"));
+
+		emailInput.sendKeys("dinithisandarekha@gmail.com");
+		passwordInput.sendKeys("chamal@1234");
+
+		WebElement signInBtn = driver.findElement(By.xpath("//*[@id=\"pp_login_3\"]/div/div[6]/input"));
+		signInBtn.click();
+
+		Thread.sleep(3000);
+
+		WebElement error = driver.findElement(By.className("profilepress-login-status"));
+		assertEquals(
+				"Error: The password you entered for the email address dinithisandarekha@gmail.com is incorrect. Lost your password?",
+				error.getText());
+	}
+
+	@Test
+	void searchCount() throws InterruptedException {
+		WebElement search = driver.findElement(By.xpath("//input[@type=\"search\"]"));
+		search.sendKeys("react");
+
+		WebElement searchBtn = driver.findElement(By.xpath("//button[@value='Search']"));
+		searchBtn.click();
+
+		Thread.sleep(5000);
+
+		List<WebElement> cards = driver.findElements(By.xpath("//div[@class='product-card']"));
+		assertTrue(cards.size() > 0);
+	}
+
+	@Test
+	void newsLetter() throws InterruptedException {
+		WebElement blog = driver.findElement(By.id("menu-item-42"));
+		blog.click();
+
+		Thread.sleep(3000);
+
+		WebElement subscribeInput = driver.findElement(By.xpath("//*[@id=\"mailster-email-1\"]"));
+		subscribeInput.sendKeys("dinsw98104@gmail.com");
+
+		Thread.sleep(3000);
+		WebElement subscribeButton = driver.findElement(By.xpath("//input[@Value='Subscribe']"));
+		subscribeButton.submit();
+	}
 }
